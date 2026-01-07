@@ -81,6 +81,23 @@ def getProfile(email):
     else:
         return format_error_msg("No user found with this email")
 
-register("1", "2", "3", "4", "5", "6", "7", "8")
-login("1", "6")
-getProfile("2")
+@router.post("/uploadSSID")
+async def uploadRequest(request: Request):
+    ssid, error = await read_json(request, ["ssid"])
+    if error:
+        return format_error_msg(error)
+    res = uploadSSID(ssid)
+    return res
+
+# TODO update this to the database
+# Returns True if ssid matches the database / the escrow
+# Else updates False
+def uploadSSID(ssid):
+    return False
+
+
+
+# register("1", "2", "3", "4", "5", "6", "7", "8")
+# login("1", "6")
+# getProfile("2")
+# getDates("1")
