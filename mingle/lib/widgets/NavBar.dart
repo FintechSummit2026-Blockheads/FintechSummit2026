@@ -57,18 +57,22 @@ class _NavBarState extends State<NavBar> {
           type: BottomNavigationBarType.fixed,
           onTap: navController.changeTabIndex,
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+            // BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search), 
+              label: 'Search'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble),
+              label: 'Chat',
+            ),
             BottomNavigationBarItem(
               key: Key("create-item"),
               icon: Icon(Icons.sell),
               label: 'Sell',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble),
-              label: 'Chat',
-            ),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+              icon: Icon(Icons.person), 
+              label: 'Profile'),
           ],
         ),
       ),
