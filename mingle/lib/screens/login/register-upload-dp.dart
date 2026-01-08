@@ -182,16 +182,17 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
               onTap: pickImage,
               child: file == null
                   ? DottedBorder(
-                      borderType: BorderType.Circle,
+                      borderType: BorderType.RRect,
                       color: secondary,
                       dashPattern: [6, 3],
                       strokeWidth: 2,
+                      radius: Radius.circular(8),
                       child: Container(
                         width: 150,
                         height: 150,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
+                          borderRadius: BorderRadius.circular(8), 
                           color: Colors.white,
                         ),
                         child: Column(
@@ -214,7 +215,8 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
                         ),
                       ),
                     )
-                  : ClipOval(
+                  : ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
                       child: Image.file(
                         file!,
                         width: 150,
@@ -288,7 +290,7 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
                           );
                         } else if (_formKey.currentState!.validate()) {
                           // signup_2();
-                        // Save role locally
+                          // Save role locally
                           await saveRole();
 
                           // TODO: call signup function here if needed
