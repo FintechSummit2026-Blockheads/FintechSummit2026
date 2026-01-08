@@ -2,7 +2,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mingle/styles/colors.dart';
 import 'package:mingle/styles/widget-styles.dart';
-import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:mingle/config/api_config.dart';
 
 /// =======================
 /// Message Model
@@ -268,7 +271,7 @@ class _MatchesChatState extends State<MatchesChat> {
 
                 SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (selectedLocation == null || selectedDate == null || selectedTime == null) return;
 
                     final combinedDateTime = DateTime(
@@ -278,6 +281,31 @@ class _MatchesChatState extends State<MatchesChat> {
                       selectedTime!.hour,
                       selectedTime!.minute,
                     );
+
+                    try {
+                      final response = await http.post(
+                        Uri.parse("${ApiConfig.loginUrl}/createDate"),
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: jsonEncode({
+                          'a_email': "jamie@mail.com",
+                          'b_email': "oliver@mail.com",
+                          'stake': 1.0,
+                          'restaurant_email': "gramsay@mail.com",
+                          'deadline': combinedDateTime.toIso8601String(), // make sure it's a string
+                        }),
+                      );
+
+                      if (response.statusCode == 200) {
+                        // success
+                        print('Date created successfully: ${response.body}');
+                      } else {
+                        print('Failed to create date: ${response.body}');
+                      }
+                    } catch (e) {
+                      print('Error: $e');
+                    }
 
                     setState(() {
                       messages.add(

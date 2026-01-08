@@ -8,7 +8,13 @@ class RestaurantDateCard extends StatelessWidget {
 
   void _showRevealDialog(BuildContext context, String name, String dateId) {
     // code will be generated using the logic in backend
-    String code = "GDJ#&@";
+    // well whats supposed to happen here is that
+    // 1. The fulfilment secret is encrypted with the restaurants public key 
+    // 2. When someone visits the restaurant, the restaurant queries with their pubkey & dateID to retrieve said encrypted secret
+    // 3. So only the restaurant can decrypt it with their private key and show the code to the user
+    // 4. Here the code is hardcoded as we are only able to implement this pub/priv key encode/decode mechanism on python and not dart
+    
+    String code = "473812";
 
     showDialog(
       context: context,
