@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mingle/styles/Colors.dart';
 import 'package:mingle/styles/widget-styles.dart';
+import 'package:intl/intl.dart';
 
 /// =======================
 /// Message Model
@@ -14,6 +15,7 @@ class ChatMessageModel {
   final DateTime timestamp;
   final DateTime? dateTime; // optional for invites
   final String? location; // optional for invites
+  final double? stake; // optional for invites
   final DateInviteStatus? inviteStatus; // null if not a date invite
 
   ChatMessageModel({
@@ -24,6 +26,7 @@ class ChatMessageModel {
     required this.timestamp,
     this.dateTime,
     this.location,
+    this.stake,
     this.inviteStatus,
   });
 }
@@ -108,72 +111,205 @@ class _MatchesChatState extends State<MatchesChat> {
   /// Date Invite Feature
   /// =======================
   void _proposeDate() {
-    final locationController = TextEditingController();
-    final dateController = TextEditingController();
+    final List<String> restaurants = [
+      "Marina Bay Sands",
+      "PS.Cafe",
+      "Din Tai Fung",
+      "Jamie’s Italian",
+      "No Signboard Seafood",
+      "Crystal Jade",
+    ];
+
+    String? selectedLocation = restaurants.first;
+    DateTime? selectedDate;
+    TimeOfDay? selectedTime;
+    double stake = 0.0;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-          left: 16,
-          right: 16,
-          top: 16,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text("Propose a Date",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            TextField(
-              controller: locationController,
-              decoration: const InputDecoration(
-                labelText: "Location",
-                border: OutlineInputBorder(),
-              ),
+      builder: (_) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+              left: 16,
+              right: 16,
+              top: 16,
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: dateController,
-              decoration: const InputDecoration(
-                labelText: "Time",
-                hintText: "e.g. 8 PM, 10 Jan",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () {
-                final location = locationController.text.trim();
-                final dateText = dateController.text.trim();
-                if (location.isEmpty || dateText.isEmpty) return;
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text("Propose a Date",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
 
-                setState(() {
-                  messages.add(
-                    ChatMessageModel(
-                      id: _genId(),
-                      content: "📅 Date proposed: $location at $dateText",
-                      isMe: true,
-                      type: MessageType.dateInvite,
-                      timestamp: DateTime.now(),
-                      location: location,
-                      dateTime: DateTime.now(), // can parse dateText if needed
-                      inviteStatus: DateInviteStatus.pending,
+                // Dropdown for Location
+                DropdownButtonFormField<String>(
+                  value: selectedLocation,
+                  items: restaurants
+                      .map((e) => DropdownMenuItem(
+                            value: e,
+                            child: Text(e),
+                          ))
+                      .toList(),
+                  decoration: const InputDecoration(
+                    labelText: "Location",
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (val) {
+                    setModalState(() {
+                      selectedLocation = val!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                // Date picker
+                TextField(
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: selectedDate == null
+                        ? "Select Date"
+                        : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                    border: const OutlineInputBorder(),
+                  ),
+                  onTap: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2100),
+                    );
+                    if (pickedDate != null) {
+                      setModalState(() {
+                        selectedDate = pickedDate;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                // Time picker
+                TextField(
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: selectedTime == null
+                        ? "Select Time"
+                        : "${selectedTime!.format(context)}",
+                    border: const OutlineInputBorder(),
+                  ),
+                  onTap: () async {
+                    final pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                    );
+                    if (pickedTime != null) {
+                      setModalState(() {
+                        selectedTime = pickedTime;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                // Spin box for stake (XRP)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "Stake (XRP): ",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  );
-                });
+                    IconButton(
+                      icon: const Icon(Icons.remove, size: 28),
+                      onPressed: () {
+                        setModalState(() {
+                          if (stake > 0.01) stake -= 0.1;
+                          stake = double.parse(stake.toStringAsFixed(2));
+                        });
+                      },
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: secondary, width: 2),
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.grey[200],
+                      ),
+                      child: Text(
+                        stake.toStringAsFixed(2), // 2 decimals
+                        style: const TextStyle(
+                          fontSize: 28, // bigger number
+                          fontWeight: FontWeight.bold,
+                          color: secondary,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add, size: 28),
+                      onPressed: () {
+                        setModalState(() {
+                          stake += 0.1;
+                          stake = double.parse(stake.toStringAsFixed(2));
+                        });
+                      },
+                    ),
+                  ],
+                ),
 
-                Navigator.pop(context);
-              },
-              child: const Text("Send Proposal"),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    if (selectedLocation == null || selectedDate == null || selectedTime == null) return;
+
+                    final combinedDateTime = DateTime(
+                      selectedDate!.year,
+                      selectedDate!.month,
+                      selectedDate!.day,
+                      selectedTime!.hour,
+                      selectedTime!.minute,
+                    );
+
+                    setState(() {
+                      messages.add(
+                        ChatMessageModel(
+                          id: _genId(),
+                          content:
+                              "📅 Date proposed: $selectedLocation at ${selectedTime!.format(context)}, Stake: ${stake.toStringAsFixed(1)} XRP",
+                          isMe: true,
+                          type: MessageType.dateInvite,
+                          timestamp: DateTime.now(),
+                          location: selectedLocation,
+                          dateTime: combinedDateTime,
+                          inviteStatus: DateInviteStatus.pending,
+                        ),
+                      );
+                    });
+
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    "Send Proposal",
+                    style: TextStyle(
+                      color: secondary, // text color to stand out on white
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -188,6 +324,7 @@ class _MatchesChatState extends State<MatchesChat> {
         timestamp: messages[index].timestamp,
         location: messages[index].location,
         dateTime: messages[index].dateTime,
+        stake: messages[index].stake,
         inviteStatus: status,
       );
 
@@ -240,7 +377,9 @@ class _MatchesChatState extends State<MatchesChat> {
               itemBuilder: (context, index) {
                 final msg = messages[index];
 
-                if (msg.type == MessageType.dateInvite && !msg.isMe && msg.inviteStatus == DateInviteStatus.pending) {
+                if (msg.type == MessageType.dateInvite &&
+                    !msg.isMe &&
+                    msg.inviteStatus == DateInviteStatus.pending) {
                   // show accept/decline buttons
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,11 +389,13 @@ class _MatchesChatState extends State<MatchesChat> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           TextButton(
-                            onPressed: () => _respondToDateInvite(index, DateInviteStatus.accepted),
+                            onPressed: () =>
+                                _respondToDateInvite(index, DateInviteStatus.accepted),
                             child: const Text("Accept"),
                           ),
                           TextButton(
-                            onPressed: () => _respondToDateInvite(index, DateInviteStatus.declined),
+                            onPressed: () =>
+                                _respondToDateInvite(index, DateInviteStatus.declined),
                             child: const Text("Decline"),
                           ),
                         ],
@@ -376,6 +517,18 @@ class ChatBubble extends StatelessWidget {
                         : msg.inviteStatus == DateInviteStatus.declined
                             ? Colors.red
                             : Colors.orange,
+                  ),
+                ),
+              ),
+            if (msg.stake != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  "Stake: ${msg.stake} XRP",
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.blueGrey,
                   ),
                 ),
               ),
