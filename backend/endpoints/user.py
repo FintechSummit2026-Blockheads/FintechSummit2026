@@ -28,9 +28,9 @@ def login(email, password):
 
 @router.post("/register")
 async def registerRequest(request: Request):
-    email, name, photo, description, dateIDs, matches, password, error = await read_json(request, 
+    email, name, photo, description, dateIDs, matches, password, pubkey, error = await read_json(request, 
         [
-        "email", "name", "photo", "description", "dateIDs", "matches", "password", 
+        "email", "name", "photo", "description", "dateIDs", "matches", "password", "pubkey"
         ]
         )
     if error:
@@ -38,7 +38,7 @@ async def registerRequest(request: Request):
     res = register(email, name, photo, description, dateIDs, matches, password)
     return res
 
-def register(email, name, photo, description, dateIDs, matches, password):
+def register(email, name, photo, description, dateIDs, matches, password, pubkey):
     usr_jsn =  {"email": email,
                 "name": name,
                 "photo": photo,
@@ -47,6 +47,7 @@ def register(email, name, photo, description, dateIDs, matches, password):
                 "matches": matches,
                 "password": password,
                 "pendingMatches": [],
+                "pubkey": pubkey,
                 }
     
     res = find_one_collection({"email": email}, "users")
