@@ -95,6 +95,28 @@ async def uploadRequest(request: Request):
 def uploadSSID(ssid):
     return False
 
+@router.post("/getDates")
+async def getDatesRequest(request: Request):
+    email, error = await read_json(request, ["email"])
+    if error:
+        return format_error_msg(error)
+    res = getDates(email)
+    return res
+
+# TODO format the date_object 
+def getDates(email):
+    res = find_one_collection({"email": email}, "users")
+    if res == None:
+        print("Not a valid user")
+        return format_error_msg("Not a valid user")
+    else:
+        print(res)
+        array_of_dates = res["dateIDs"]
+        for date in array_of_dates:
+            # date_object = find_one_collection({"date"})
+            pass
+
+        # return format_success_msg()
 
 
 # register("1", "2", "3", "4", "5", "6", "7", "8")
