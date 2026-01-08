@@ -33,7 +33,6 @@ def format_error_msg(error):
     dict["success"] = False
     return dict 
 
-
 def removeBsonID(obj):
     obj.pop("_id")
     return obj

@@ -1,2 +1,6 @@
 .venv/
+./backend/.env
+seed
+
+*.pyc
 backend/.env
