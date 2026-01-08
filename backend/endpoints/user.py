@@ -10,14 +10,14 @@ router = APIRouter()
 
 @router.post("/login")
 async def loginRequest(request: Request):
-    name, password, error = await read_json(request, ["name", "password"])
+    email, password, error = await read_json(request, ["email", "password"])
     if error:
         return format_error_msg(error)
     
-    return getAuth(name, password)
+    return getAuth(email, password)
 
-def login(name, password):
-    res = find_one_collection({"name": name, "password": password}, "users")
+def login(email, password):
+    res = find_one_collection({"email": email, "password": password}, "users")
     if res == None:
         print("Password doesnt match or no user found")
         return format_error_msg("Password doesnt match or no user found")
@@ -27,28 +27,24 @@ def login(name, password):
 
 @router.post("/register")
 async def registerRequest(request: Request):
-    name, email, photo, description, dates, password, public_key, private_key, error = await read_json(request, 
+    email, name, photo, description, dateIDs, matches, password, error = await read_json(request, 
         [
-        "name", "email", "photo", "description", "dates", "password",
-                "public key", "private key"
+        "email", "name", "photo", "description", "dateIDs", "matches", "password", 
         ]
         )
     if error:
         return format_error_msg(error)
-    res = register(name, email, photo, description, dates, password,
-                public_key, private_key)
+    res = register(email, name, photo, description, dateIDs, matches, password)
     return res
 
-def register(name, email, photo, description, dates, password,
-                public_key, private_key):
-    usr_jsn =  {"name": name,
-                "email": email,
+def register(email, name, photo, description, dateIDs, matches, password):
+    usr_jsn =  {"email": email,
+                "name": name,
                 "photo": photo,
                 "description": description,
-                "dates": dates,
+                "dateIDs": dateIDs,
+                "matches": matches,
                 "password": password,
-                "public key": public_key,
-                "private key": private_key
                 }
     
     res = find_one_collection({"email": email}, "users")
@@ -81,6 +77,6 @@ def getProfile(email):
     else:
         return format_error_msg("No user found with this email")
 
-register("1", "2", "3", "4", "5", "6", "7", "8")
+register("1", "name", "photo", "description", [1,2,3], [1,2,3], "6")
 login("1", "6")
-getProfile("2")
+getProfile("1")

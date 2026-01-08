@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from endpoints import user
+from endpoints import user, restaurant, general
 
 app = FastAPI()
 app.add_middleware(
@@ -13,7 +13,17 @@ app.add_middleware(
 
 app.include_router(
     user.router,
-    prefix = "/login"
+    prefix = "/user"
+)
+
+app.include_router(
+    restaurant.router,
+    prefix = "/restaurant"
+)
+
+app.include_router(
+    general.router,
+    prefix = "/general"
 )
 
 @app.get("/")
