@@ -154,45 +154,55 @@ def confirmDate(date_id):
         "dates")
     return format_success_msg({})
 
-def arrive(pubkey, date_id):
-    date = find_one_collection({"date_id": date_id}, "dates")
 
-    if pubkey == date["a_pubkey"]:
-        update_to_collection(
-            {"date_id": date_id},
-            {
-                "iconfirmd": True,
-            },
-            "dates")
-        return format_success_msg({})
-    elif pubkey == date["b_pubkey"]:
-        update_to_collection(
-            {"date_id": date_id},
-            {
-                "bconfirmd": True,
-            },
-            "dates")
-        return format_success_msg({})
-    else:
-        return format_error_msg("No date found with this ID")
+@router.post("/arrive")
+async def arriveRequest(request: Request):
+    email,
+    date_id, error = await read_json(request, [
+        "email",
+        "date_id"])
+    if error:
+        return format_error_msg(error)
+    return arrive(email, date_id)
+
+def arrive(email, date_id):
+    date = find_one_collection({"date_id": date_id}, "dates")
+    restaurant_pubkey = date["restaurant_pubkey"]
     
+    if date["seqA"] != -1 and date["seqB"] != -1:
+        if email == date["a_email"]:
+            return format_success_msg({"encSec": date["secA"], 
+            "seq": date["seqA"], 
+            "restaurant_pubkey": restaurant_pubkey})
+        elif email == date["b_email"]:
+            return format_success_msg({"encSec": date["secB"], 
+            "seq": date["seqB"],
+            "restaurant_pubkey": restaurant_pubkey})
+        else:
+            return format_error_msg("No date found with this ID")
+    else:
+        return format_error_msg("Both parties have not accepted the date yet")
 
 # Testing
 
-temp = generate_unique_6_digit()
-print(createDate(temp,
-    "abc@mail.com",
-    "1234@m.com",
-    100,
-    "restaurant@123",
-    "deadline",
-    "secA",
-    "secB",
-    "condA",
-    "condB"))
-print(getDate(temp))
-print(acceptDate("abc@mail.com", temp, 5))
-print(acceptDate("1234@m.com", temp, 5678))
-# print(rejectDate(temp))
-printconfirmDate(temp))
-print(getDate(temp))
+# temp = generate_unique_6_digit()
+# print(createDate(temp,
+#     "abc@mail.com",
+#     "1234@m.com",
+#     100,
+#     "restaurant@123",
+#     "deadline",
+#     "secA",
+#     "secB",
+#     "condA",
+#     "condB"))
+# print(getDate(temp))
+# print(acceptDate("abc@mail.com", temp, 5))
+# print(acceptDate("1234@m.com", temp, 5678))
+# # print(rejectDate(temp))
+# printconfirmDate(temp)
+# print(getDate(temp))
+
+# temp = 424134
+
+# print(arrive("abc@mail.com", temp))
