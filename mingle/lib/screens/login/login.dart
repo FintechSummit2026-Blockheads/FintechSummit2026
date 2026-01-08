@@ -25,9 +25,36 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   // Get a reference your Supabase client
   // final supabase = Supabase.instance.client;
+
   bool passwordVisible = false;
   TextEditingController email = TextEditingController(text: "123@gmail.com");
   TextEditingController password = TextEditingController(text: "123456");
+
+  // NEW: selection state, 0 = User, 1 = Restaurant
+  bool isUser = true; // default: User
+
+  @override
+  void initState() {
+    super.initState();
+    loadSavedRole();
+  }
+
+  Future<void> loadSavedRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    final role = prefs.getString("role");
+
+    if (role != null) {
+      setState(() {
+        isUser = role == "user";
+      });
+    }
+  }
+
+  // Save role to SharedPreferences
+  Future<void> saveRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("role", isUser ? "user" : "restaurant");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +104,35 @@ class _LoginState extends State<Login> {
                   ),
                 ),
               ),
+
+              SizedBox(height: height * 0.033),
+
+              //select user/restaurant role
+              ToggleButtons(
+                borderRadius: BorderRadius.circular(12),
+                selectedColor: Colors.white,
+                fillColor: secondary,
+                color: black,
+                isSelected: [isUser, !isUser],
+                onPressed: (int index) async {
+                  setState(() {
+                    isUser = index == 0; // 0 = User, 1 = Restaurant
+                  });
+                  await saveRole(); // save immediately
+                },
+                children: const [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text("User"),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text("Restaurant"),
+                  ),
+                ],
+              ),
+
+
               Padding(
                 padding: EdgeInsets.symmetric(
                   vertical: height * 0.033,
@@ -89,29 +145,12 @@ class _LoginState extends State<Login> {
                         key: Key('goToMainPage'),
                         text: "Login",
                         onPressed: () async {
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          String? role = prefs.getString("role");
-                          
-                          if (role == null) {
-                            // fallback if role not saved
-                            Get.snackbar(
-                              "Error",
-                              "Role not found. Please complete registration first.",
-                              snackPosition: SnackPosition.BOTTOM,
-                            );
-                            return;
-                          }
+                          await saveRole(); // ensure role is saved
 
-                          if (role == "user") {
+                          if (isUser) {
                             Get.offAll(() => NavBarUser());
-                          } else if (role == "restaurant") {
-                            Get.offAll(() => NavBarRestaurant());
                           } else {
-                            Get.snackbar(
-                              "Error",
-                              "Unknown role",
-                              snackPosition: SnackPosition.BOTTOM,
-                            );
+                            Get.offAll(() => NavBarRestaurant());
                           }
                           // final loader = LoadingOverlay();
                           // loader.show(context);

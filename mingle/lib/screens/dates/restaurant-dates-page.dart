@@ -20,7 +20,7 @@ class RestaurantDatePage extends StatelessWidget {
         "photo": "https://randomuser.me/api/portraits/women/44.jpg",
       },
       "dateTime": "2026-01-07T18:30:00",
-      "matchId": "match_001",
+      "dateId": "match_001",
     },
     {
       "a": {
@@ -34,7 +34,7 @@ class RestaurantDatePage extends StatelessWidget {
         "photo": "https://randomuser.me/api/portraits/women/44.jpg",
       },
       "dateTime": "2026-01-07T18:30:00",
-      "matchId": "match_001",
+      "dateId": "match_001",
     },
     {
       "a": {
@@ -48,7 +48,7 @@ class RestaurantDatePage extends StatelessWidget {
         "photo": "https://randomuser.me/api/portraits/women/44.jpg",
       },
       "dateTime": "2026-01-07T18:30:00",
-      "matchId": "match_001",
+      "dateId": "match_001",
     },
   ];
 

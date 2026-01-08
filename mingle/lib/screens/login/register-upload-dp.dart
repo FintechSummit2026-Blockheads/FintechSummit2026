@@ -45,21 +45,30 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
   // final supabase = Supabase.instance.client;
   File? file;
 
-    // NEW: selection state, 0 = User, 1 = Restaurant
-  List<bool> selectedRole = [true, false]; // default: User
+  // NEW: selection state, 0 = User, 1 = Restaurant
+  bool isUser = true; // default: User
 
-  // Helper to save role locally
-  Future<void> saveRole() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String role = selectedRole[0] ? "user" : "restaurant";
-    await prefs.setString("role", role);
-    print("Saved role: $role"); // optional debug
+  @override
+  void initState() {
+    super.initState();
+    loadSavedRole();
   }
 
-  // Helper to read role (can be used elsewhere in login/main page)
-  Future<String?> getRole() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("role");
+  Future<void> loadSavedRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    final role = prefs.getString("role");
+
+    if (role != null) {
+      setState(() {
+        isUser = role == "user";
+      });
+    }
+  }
+
+  // Save role to SharedPreferences
+  Future<void> saveRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("role", isUser ? "user" : "restaurant");
   }
 
   // Image picker
@@ -249,13 +258,12 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
               selectedColor: Colors.white,
               fillColor: secondary,
               color: black,
-              isSelected: selectedRole,
-              onPressed: (int index) {
+              isSelected: [isUser, !isUser],
+              onPressed: (int index) async {
                 setState(() {
-                  for (int i = 0; i < selectedRole.length; i++) {
-                    selectedRole[i] = i == index;
-                  }
+                  isUser = index == 0; // 0 = User, 1 = Restaurant
                 });
+                await saveRole(); // save immediately
               },
               children: const [
                 Padding(
@@ -295,8 +303,7 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
 
                           // TODO: call signup function here if needed
                           // Navigate to correct page based on role
-                          String role = selectedRole[0] ? "user" : "restaurant";
-                          if (role == "user") {
+                          if (isUser) {
                             Get.offAll(() => NavBarUser());
                           } else {
                             Get.offAll(() => NavBarRestaurant());

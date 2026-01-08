@@ -6,6 +6,32 @@ class RestaurantDateCard extends StatelessWidget {
 
   const RestaurantDateCard({super.key, required this.match});
 
+  void _showRevealDialog(BuildContext context, String name, String dateId) {
+    // code will be generated using the logic in backend
+    String code = "GDJ#&@";
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Reveal Key for $name"),
+        content: Text(
+          code,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Close"),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final DateTime date =
@@ -21,6 +47,16 @@ class RestaurantDateCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            ///Date ID
+            
+            Text(
+              "Date ID: ${match["dateId"]}",
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
             /// A & B profiles
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -49,17 +85,29 @@ class RestaurantDateCard extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            /// Generate Key Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // to be replaced with actual key(SSID) generation function
-                  print("Generate key for ${match["matchId"]}");
-                },
-                child: const Text("Generate Key"),
-              ),
+            /// Reveal Key Buttons for A & B
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _showRevealDialog(context, match["a"]["name"], match["dateId"]);
+                    },
+                    child: Text("Reveal for ${match["a"]["name"]}"),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _showRevealDialog(context, match["b"]["name"], match["dateId"]);
+                    },
+                    child: Text("Reveal for ${match["b"]["name"]}"),
+                  ),
+                ),
+              ],
             ),
+
           ],
         ),
       ),
