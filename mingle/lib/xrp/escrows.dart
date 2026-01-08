@@ -1,5 +1,11 @@
 import 'package:xrpl_dart/xrpl_dart.dart';
 import 'package:mingle/xrp/quick_wallet.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mingle/config/api_config.dart';
+
+
 
 /// Converts a DateTime to Ripple epoch time (seconds since January 1, 2000)
 int dateTimeToRippleTime(DateTime dateTime) {
@@ -23,6 +29,8 @@ Future<void> escrowCreate({
   required int startTimeEpoch,
   required int endTimeEpoch,
 }) async {
+  final prefs = await SharedPreferences.getInstance();
+
   final DateTime finishAfterOneHours = DateTime.fromMillisecondsSinceEpoch(startTimeEpoch);
   final DateTime cancelAfterOnDay = DateTime.fromMillisecondsSinceEpoch(endTimeEpoch);
 
@@ -57,6 +65,19 @@ Future<void> escrowCreate({
   print("engine result: ${result.engineResult}");
   print("engine result message: ${result.engineResultMessage}");
   print("is success: ${result.isSuccess}");
+
+  final response = await http.post(
+    Uri.parse("${ApiConfig.loginUrl}/acceptDate"),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      'person_email': prefs.getString('email'),
+      'date_id': dateID,
+      'seq': sequence
+    }
+  ));
+  print("Response $response");
 }
 
 
@@ -80,7 +101,6 @@ Future<void> finishEscrow({
 
   /// show fee of transaction
   print("fee with fulfillment ${escrowFinish.fee}");
-
   final blob = escrowFinish.toSigningBlobBytes(yourWallet.toAddress);
   print("sign transction");
   final sig = yourWallet.privateKey.sign(blob);
@@ -91,8 +111,7 @@ Future<void> finishEscrow({
   final trBlob = escrowFinish.toTransactionBlob();
   print("regenarate transaction blob with exists signatures");
   print("broadcasting signed transaction blob");
-  final result =
-      await yourWallet.rpc.request(XRPRequestSubmit(txBlob: trBlob));
+  final result = await yourWallet.rpc.request(XRPRequestSubmit(txBlob: trBlob));
   print("transaction hash: ${result.txJson.hash}");
   print("engine result: ${result.engineResult}");
   print("engine result message: ${result.engineResultMessage}");
