@@ -9,6 +9,8 @@ class ApiConfig {
   static const String registerEndpoint = '/user/register';
   static const String logoutEndpoint = '/auth/logout';
 
+  // Restaurant endpoints
+
   // User endpoints
   static const String getUserProfile = '/user/profile';
   static const String updateUserProfile = '/user/update';
