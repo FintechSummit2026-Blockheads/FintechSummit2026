@@ -46,10 +46,6 @@ class _LoginState extends State<Login> {
                 "Join the Community.",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
               ),
-              Text(
-                "Fashionable and professional pre-loved",
-                style: TextStyle(fontSize: 14),
-              ),
               SizedBox(height: height * 0.1),
               TextFormField(
                 autofillHints: [AutofillHints.email],

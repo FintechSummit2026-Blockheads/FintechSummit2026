@@ -82,10 +82,6 @@ class _RegisterState extends State<Register> {
               "Sign Up For Free.",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
             ),
-            Text(
-              "Fashionable and professional pre-loved",
-              style: TextStyle(fontSize: 14),
-            ),
             SizedBox(height: height * 0.10),
             Form(
               key: _formKey,
