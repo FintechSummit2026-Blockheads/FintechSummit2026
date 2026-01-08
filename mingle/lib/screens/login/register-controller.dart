@@ -11,6 +11,7 @@ class RegisterController extends GetxController {
     required String email,
     required String password,
     required String description,
+    required bool isUser,
   }) async {
     try {
       isLoading.value = true;
@@ -20,6 +21,7 @@ class RegisterController extends GetxController {
         email: email,
         password: password,
         description: description,
+        isUser: isUser,
       );
       
       isLoading.value = false;

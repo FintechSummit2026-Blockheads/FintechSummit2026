@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:mingle/screens/profile/mini-profile.dart';
 
-class UserDatesCard extends StatelessWidget {
+class UserDatesCard extends StatefulWidget {
   final Map<String, dynamic> match;
 
   const UserDatesCard({super.key, required this.match});
 
   @override
-  Widget build(BuildContext context) {
-    final DateTime date =
-        DateTime.parse(match["dateTime"]);
+  State<UserDatesCard> createState() => _UserDatesCardState();
+}
 
-    TextEditingController keyController = TextEditingController();
+class _UserDatesCardState extends State<UserDatesCard> {
+  bool accepted = false;
+  bool declined = false;
+
+  final TextEditingController keyController = TextEditingController();
+
+  @override
+  void dispose() {
+    keyController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // If declined, remove card completely
+    if (declined) {
+      return const SizedBox.shrink();
+    }
+
+    final DateTime date =
+        DateTime.parse(widget.match["dateTime"]);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -27,9 +46,9 @@ class UserDatesCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                MiniProfile(profile: match["a"]),
+                MiniProfile(profile: widget.match["a"]),
                 const SizedBox(width: 32),
-                MiniProfile(profile: match["b"]),
+                MiniProfile(profile: widget.match["b"]),
               ],
             ),
 
@@ -51,35 +70,63 @@ class UserDatesCard extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            ///Restaurant
+            /// Restaurant
             Text(
-              "At: ${match["restaurant"] ?? "Unknown"}",
+              "At: ${widget.match["restaurant"] ?? "Unknown"}",
               style: const TextStyle(fontSize: 16),
             ),
 
+            const SizedBox(height: 16),
 
-            /// Key Input Field
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: TextField(
-                controller: keyController,
-                decoration: InputDecoration(
-                  labelText: "Enter the Key here",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(Icons.send),
+            /// Accept / Decline Buttons
+            if (!accepted)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  OutlinedButton(
                     onPressed: () {
-                      // Replace with logic from entering key
-                      print("Entered key for ${match["matchId"]}: ${keyController.text}");
-                                  print("Match object: $match");
-print("Restaurant key: ${match["restaurant"]}");
+                      setState(() {
+                        accepted = true;
+                      });
                     },
+                    child: const Text("Accept"),
+                  ),
+                  const SizedBox(width: 16),
+                  OutlinedButton(
+                    onPressed: () {
+                      setState(() {
+                        declined = true;
+                      });
+                    },
+                    child: const Text("Decline"),
+                  ),
+                ],
+              ),
+
+            /// Key Input Field (Only if accepted)
+            if (accepted)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: TextField(
+                  controller: keyController,
+                  decoration: InputDecoration(
+                    labelText: "Enter the Key here",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed: () {
+                        print(
+                          "Entered key for ${widget.match["matchId"]}: ${keyController.text}",
+                        );
+                        print("Match object: ${widget.match}");
+                        print("Restaurant key: ${widget.match["restaurant"]}");
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

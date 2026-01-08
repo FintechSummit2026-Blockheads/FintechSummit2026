@@ -28,7 +28,7 @@ class _LoginState extends State<Login> {
   late TextEditingController email;
   late TextEditingController password;
   bool isLoading = false;
-  List<bool> selectedRole = [true, false]; // default: User
+  // List<bool> selectedRole = [true, false]; // default: User
 
   @override
   void initState() {
@@ -86,12 +86,10 @@ class _LoginState extends State<Login> {
                 selectedColor: Colors.white,
                 fillColor: secondary,
                 color: black,
-                isSelected: selectedRole,
+                isSelected: [isUser, !isUser],
                 onPressed: (int index) {
                   setState(() {
-                    for (int i = 0; i < selectedRole.length; i++) {
-                      selectedRole[i] = i == index;
-                    }
+                    isUser = index == 0; // 0 = User, 1 = Restaurant
                   });
                 },
                 children: const [

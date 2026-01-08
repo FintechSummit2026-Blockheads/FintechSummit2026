@@ -64,7 +64,7 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
   }
 
   //other role selector (TODO)
-  List<bool> selectedRole = [true, false]; // default: User
+  // List<bool> selectedRole = [true, false]; // default: User
   bool isLoading = false;
 
   final RegisterController registerController = Get.put(RegisterController());
@@ -81,6 +81,16 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
   }
 
   Future<void> handleSignUp() async {
+     if (file == null) {
+      Get.snackbar(
+        "Note",
+        "Please select a profile picture",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.white,
+      );
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -90,19 +100,17 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
     });
 
     try {
-      String role = selectedRole[0] ? "user" : "restaurant";
-
       final result = await registerController.registerUser(
         name: widget.name,
         email: widget.email,
         password: widget.password,
         description: userName.text,
+        isUser: isUser,
       );
 
       if (result['success']) {
         // Save role to SharedPreferences
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('role', role);
+        await saveRole();
 
         Get.snackbar(
           "Success",
@@ -111,7 +119,7 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
         );
 
         // Navigate based on role
-        if (role == "user") {
+        if (isUser) {
           Get.offAll(() => NavBarUser());
         } else {
           Get.offAll(() => NavBarRestaurant());
@@ -255,27 +263,7 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
                       text: isLoading ? "Registering..." : "Sign Up",
                       onPressed: isLoading ? null : () async {
                         handleSignUp();
-                        if (file == null) {
-                          Get.snackbar(
-                            "Note",
-                            "Please select a profile picture",
-                            snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: Color(0xFFFFFFFF),
-                          );
-                        } else if (_formKey.currentState!.validate()) {
-                          // signup_2();
-                          // Save role locally
-                          await saveRole();
-
-                          // TODO: call signup function here if needed
-                          // Navigate to correct page based on role
-                          if (isUser) {
-                            Get.offAll(() => NavBarUser());
-                          } else {
-                            Get.offAll(() => NavBarRestaurant());
-                          }
-                        }
-                      
+                                        
                        
                       },
                     ),
