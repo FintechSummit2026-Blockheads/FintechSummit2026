@@ -140,10 +140,15 @@ class AuthService {
     required String email,
     required String password,
     required String description,
+    required bool isUser,
   }) async {
     try {
+      final String url = isUser 
+        ? '${ApiConfig.baseUrl}/user/register' 
+        : '${ApiConfig.baseUrl}/restaurant/register';
+
       final response = await http.post(
-        Uri.parse(ApiConfig.registerUrl),
+        Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
         },

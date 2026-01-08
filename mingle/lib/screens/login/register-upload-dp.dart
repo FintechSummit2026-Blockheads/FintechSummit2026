@@ -64,7 +64,7 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
   }
 
   //other role selector (TODO)
-  List<bool> selectedRole = [true, false]; // default: User
+  // List<bool> selectedRole = [true, false]; // default: User
   bool isLoading = false;
 
   final RegisterController registerController = Get.put(RegisterController());
@@ -105,6 +105,7 @@ class _RegisterUploadDPState extends State<RegisterUploadDP> {
         email: widget.email,
         password: widget.password,
         description: userName.text,
+        isUser: isUser,
       );
 
       if (result['success']) {
