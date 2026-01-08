@@ -147,17 +147,39 @@ async def postSendInvitationRequest(request: Request):
     return format_success_msg(res)
 
 def acceptMatch(emailUser, emailMatch):
-    userProfile = find_one_collection({"email": emailUser})
+    userProfile = find_one_collection({"email": emailUser}, "users")
     pendingMatches = userProfile["pendingMatches"]
+    for match in pendingMatches:
+        if match == emailMatch:
+            pendingMatches.remove(emailMatch)
+            update_to_collection({"email": emailUser}, {"pendingMatches": pendingMatches}, "users")
+            addToMatchedPeopleArrayA(emailUser, emailMatch)
+            addToMatchedPeopleArrayA(emailMatch, emailUser)
+            return {"access": True}
     pendingMatches.add(emailMatch)
     update_to_collection({"email": emailUser}, {"pendingMatches": pendingMatches}, "users")
     return {"access": True}
 
-
+def addToMatchedPeopleArrayA(emailA, emailB):
+    aProfile = find_one_collection({"email": emailA}, "users")
+    matchedPeopleArrayA = aProfile["matches"]
+    matchedPeopleArrayA.add(emailB)
+    update_to_collection({"email": emailA}, {"matches": matchedPeopleArrayA}, "users")
     
 
+# @router.post("/getPendingMatches")
+# async def getPendingMatchesRequest(request: Request):
+#     emailUser, error = await read_json(re)
+    
 
-# register("1", "2", "3", "4", "5", "6", "7", "8")
+# print("Register 1")
+# register("1", "2", "3", "4", "5", "6", "7")
+# print("Register 123")
+# register("123", "2", "3", "4", "5", "6", "7")
+# print("Accepting match")
+# acceptMatch("1", "123")
+# acceptMatch("123", "1")
+
 # login("1", "6")
 # getProfile("2")
 # getDates("1")
